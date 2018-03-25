@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Stalker</string>
+    <string name="ACCOUNT_KIT_CLIENT_TOKEN">4daa4e03c21161c07a0c40b64cdf33ad</string>
+    <string name="facebook_app_id">223617001524176</string>
+    <string name="fb_login_protocol_scheme">fb223617001524176</string>
+
+
+
+</resources>
