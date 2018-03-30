@@ -1,16 +1,20 @@
 package com.example.macarie.stalker;
 
-import android.app.ActionBar;
+import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
-import android.view.Window;
+import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -35,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private CallbackManager mCallbackManager;
     private FirebaseAuth mAuth;
-
+    private TextView mTextMessage;
 
     @Override
     protected void onStart() {
@@ -45,8 +49,40 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mTextMessage = (TextView) findViewById(R.id.message);
+        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        Fragment selectedFragment = null;
+                        switch (item.getItemId()) {
+                            case R.id.navigation_home:
+                                selectedFragment = HomeFragment.newInstance();
+                                break;
+                            case R.id.navigation_dashboard:
+                                selectedFragment = HomeFragment.newInstance();
+                                break;                            case R.id.navigation_notifications:
+                                selectedFragment = HomeFragment.newInstance();
+                                break;
+                        }
+                        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                        transaction.replace(R.id.frame_layout, selectedFragment);
+                        transaction.commit();
+
+                        return true;
+                    }
+                }
+        );
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, HomeFragment.newInstance());
+        transaction.commit();
+
 
         mAuth = FirebaseAuth.getInstance();
 
