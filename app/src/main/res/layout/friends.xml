@@ -5,10 +5,10 @@
     tools:context="com.example.macarie.stalker.FriendsFragment">
 
     <ImageView
-        android:id="@+id/truiton_image"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@color/colorAccent"
+        android:id="@+id/friends"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
         android:layout_centerInParent="true"/>
 
 

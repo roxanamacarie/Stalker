@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private CallbackManager mCallbackManager;
     private FirebaseAuth mAuth;
     private TextView mTextMessage;
+    private boolean logged = false;
 
     @Override
     protected void onStart() {
@@ -49,9 +50,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        startService(new Intent(this, LocationService.class));
 
         mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
@@ -60,15 +62,20 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         Fragment selectedFragment = null;
-                        switch (item.getItemId()) {
-                            case R.id.navigation_home:
-                                selectedFragment = HomeFragment.newInstance();
-                                break;
-                            case R.id.navigation_dashboard:
-                                selectedFragment = HomeFragment.newInstance();
-                                break;                            case R.id.navigation_notifications:
-                                selectedFragment = HomeFragment.newInstance();
-                                break;
+                        if (logged) {
+                            switch (item.getItemId()) {
+                                case R.id.home:
+                                    selectedFragment = HomeFragment.newInstance();
+                                    break;
+                                case R.id.friends:
+                                    selectedFragment = FriendsFragment.newInstance();
+                                    break;
+                                case R.id.chat:
+                                    selectedFragment = ChatFragment.newInstance();
+                                    break;
+                            }
+                        } else {
+                            selectedFragment = StartFragment.newInstance();
                         }
                         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                         transaction.replace(R.id.frame_layout, selectedFragment);
@@ -80,7 +87,11 @@ public class MainActivity extends AppCompatActivity {
         );
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_layout, HomeFragment.newInstance());
+        if (logged)
+            transaction.replace(R.id.frame_layout, HomeFragment.newInstance());
+        else
+            transaction.replace(R.id.frame_layout, StartFragment.newInstance());
+
         transaction.commit();
 
 
@@ -110,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(LoginResult loginResult) {
 
                 Log.d(TAG, "facebook:onSuccess:" + loginResult);
+                logged = true;
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
