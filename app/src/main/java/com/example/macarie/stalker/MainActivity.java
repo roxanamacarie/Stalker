@@ -14,10 +14,12 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -39,8 +41,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private CallbackManager mCallbackManager;
     private FirebaseAuth mAuth;
-    private TextView mTextMessage;
-    private boolean logged = false;
 
     @Override
     protected void onStart() {
@@ -53,29 +53,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        startService(new Intent(this, LocationService.class));
-
-        mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         Fragment selectedFragment = null;
-                        if (logged) {
-                            switch (item.getItemId()) {
-                                case R.id.home:
-                                    selectedFragment = HomeFragment.newInstance();
-                                    break;
-                                case R.id.friends:
-                                    selectedFragment = FriendsFragment.newInstance();
-                                    break;
-                                case R.id.chat:
-                                    selectedFragment = ChatFragment.newInstance();
-                                    break;
-                            }
-                        } else {
-                            selectedFragment = StartFragment.newInstance();
+                        switch (item.getItemId()) {
+                            case R.id.home:
+                                selectedFragment = HomeFragment.newInstance();
+                                break;
+                            case R.id.friends:
+                                selectedFragment = FriendsFragment.newInstance();
+                                break;
+                            case R.id.chat:
+                                selectedFragment = ChatFragment.newInstance();
+                                break;
                         }
                         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                         transaction.replace(R.id.frame_layout, selectedFragment);
@@ -87,15 +80,11 @@ public class MainActivity extends AppCompatActivity {
         );
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        if (logged)
-            transaction.replace(R.id.frame_layout, HomeFragment.newInstance());
-        else
-            transaction.replace(R.id.frame_layout, StartFragment.newInstance());
-
+        transaction.replace(R.id.frame_layout, StartFragment.newInstance());
         transaction.commit();
 
-
         mAuth = FirebaseAuth.getInstance();
+
 
         try {
             PackageInfo info = getPackageManager().getPackageInfo(
@@ -116,12 +105,16 @@ public class MainActivity extends AppCompatActivity {
         LoginButton loginButton = findViewById(R.id.login_button);
         loginButton.setReadPermissions("email", "public_profile");
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-
             @Override
             public void onSuccess(LoginResult loginResult) {
 
                 Log.d(TAG, "facebook:onSuccess:" + loginResult);
-                logged = true;
+
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.frame_layout, HomeFragment.newInstance());
+                transaction.commit();
+
+                findViewById(R.id.navigation).setVisibility(View.VISIBLE);
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
@@ -137,7 +130,35 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(
+                    AccessToken oldAccessToken,
+                    AccessToken currentAccessToken) {
+                if (currentAccessToken == null) {
+                    //User logged out
+                    Toast.makeText(MainActivity.this, "Logged out", Toast.LENGTH_SHORT).show();
 
+                    mAuth.signOut();
+                    findViewById(R.id.navigation).setVisibility(View.GONE);
+                    //stopService(new Intent(MainActivity.this, LocationService.class));
+
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.frame_layout, StartFragment.newInstance());
+                    transaction.commit();
+                }
+            }
+        };
+
+        startService(new Intent(getApplicationContext(), LocationService.class));
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LoginManager.getInstance().logOut();
+        //stopService(new Intent(MainActivity.this, LocationService.class));
     }
 
     @Override
@@ -168,11 +189,5 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-    }
-
-    public void signOut() {
-        mAuth.signOut();
-        LoginManager.getInstance().logOut();
-
     }
 }

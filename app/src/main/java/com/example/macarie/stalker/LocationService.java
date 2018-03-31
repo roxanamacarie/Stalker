@@ -47,15 +47,9 @@ public class LocationService extends Service implements
         mLocationRequest.setInterval(LOCATION_INTERVAL);
         mLocationRequest.setFastestInterval(FASTEST_LOCATION_INTERVAL);
 
-
-        int priority = LocationRequest.PRIORITY_HIGH_ACCURACY; //by default
-        //PRIORITY_BALANCED_POWER_ACCURACY, PRIORITY_LOW_POWER, PRIORITY_NO_POWER are the other priority modes
-
-
-        mLocationRequest.setPriority(priority);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationClient.connect();
 
-        //Make it stick to the notification panel so it is less prone to get cancelled by the Operating System.
         return START_STICKY;
     }
 
@@ -65,23 +59,13 @@ public class LocationService extends Service implements
         return null;
     }
 
-    /*
-     * LOCATION CALLBACKS
-     */
+    // Location callbacks
     @Override
     public void onConnected(Bundle dataBundle) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
 
             Log.d(TAG, "== Error On onConnected() Permission not granted");
             //Permission not granted by user so cancel the further execution.
-
             return;
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mLocationClient, mLocationRequest, this);
@@ -89,17 +73,13 @@ public class LocationService extends Service implements
         Log.d(TAG, "Connected to Google API");
     }
 
-    /*
-     * Called by Location Services if the connection to the
-     * location client drops because of an error.
-     */
+    // In case of connection suspended
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(TAG, "Connection suspended");
     }
 
-
-    //to get the location change
+    // Get the location change
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "Location changed");
@@ -125,12 +105,9 @@ public class LocationService extends Service implements
 
     }
 
-
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "Failed to connect to Google API");
 
     }
-
-
 }

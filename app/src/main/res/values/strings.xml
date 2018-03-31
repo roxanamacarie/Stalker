@@ -5,8 +5,8 @@
     <string name="fb_login_protocol_scheme">fb223617001524176</string>
 
 
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_location">All about you</string>
+    <string name="title_friends">Your friends</string>
+    <string name="title_chat">Chat</string>
 
 </resources>

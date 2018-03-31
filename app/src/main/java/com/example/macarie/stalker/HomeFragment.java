@@ -55,7 +55,7 @@ public class HomeFragment extends Fragment {
 
         mMsgView = (TextView) v.findViewById(R.id.msg);
 
-
+        // We get the location details, and put them in a textview
         LocalBroadcastManager.getInstance(inflater.getContext()).registerReceiver(
                 new BroadcastReceiver() {
                     @Override
