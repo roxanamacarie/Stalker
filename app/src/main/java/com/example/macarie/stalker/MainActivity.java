@@ -23,9 +23,14 @@ import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.common.api.Response;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -33,6 +38,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -42,16 +52,51 @@ public class MainActivity extends AppCompatActivity {
     private CallbackManager mCallbackManager;
     private FirebaseAuth mAuth;
 
+    private String username;
+
+    private Intent serviceIntent;
+
+    private AccessTokenTracker accessTokenTracker;
+
     @Override
     protected void onStart() {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
     }
 
+    private void initAccessTokenTracker() {
+        accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(
+                    AccessToken oldAccessToken,
+                    AccessToken currentAccessToken) {
+                if (currentAccessToken == null) {
+                    //User logged out
+                    Toast.makeText(MainActivity.this, "Logged out", Toast.LENGTH_SHORT).show();
+
+                    stopService(new Intent(MainActivity.this, LocationService.class));
+
+                    mAuth.signOut();
+                    findViewById(R.id.navigation).setVisibility(View.GONE);
+
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.frame_layout, StartFragment.newInstance());
+                    transaction.commit();
+                }
+            }
+        };
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
         setContentView(R.layout.activity_main);
+
+        if (Profile.getCurrentProfile() != null) {
+            LoginManager.getInstance().logOut();
+        }
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(
@@ -85,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-
         try {
             PackageInfo info = getPackageManager().getPackageInfo(
                     "com.example.macarie.stalker",
@@ -101,14 +145,21 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+        initAccessTokenTracker();
+
         mCallbackManager = CallbackManager.Factory.create();
         LoginButton loginButton = findViewById(R.id.login_button);
-        loginButton.setReadPermissions("email", "public_profile");
+        loginButton.setReadPermissions("email", "public_profile", "user_friends");
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
 
                 Log.d(TAG, "facebook:onSuccess:" + loginResult);
+
+                if (Profile.getCurrentProfile() != null)
+                    username = Profile.getCurrentProfile().getName();
+                else
+                    username = "Empty";
 
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.frame_layout, HomeFragment.newInstance());
@@ -116,6 +167,14 @@ public class MainActivity extends AppCompatActivity {
 
                 findViewById(R.id.navigation).setVisibility(View.VISIBLE);
                 handleFacebookAccessToken(loginResult.getAccessToken());
+
+                serviceIntent = new Intent(MainActivity.this, LocationService.class);
+                serviceIntent.putExtra("username", username);
+
+                startService(serviceIntent);
+
+                // start tracking the access token tracker
+                accessTokenTracker.startTracking();
             }
 
             @Override
@@ -128,37 +187,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "facebook:onError", error);
             }
         });
-
-
-        AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
-            @Override
-            protected void onCurrentAccessTokenChanged(
-                    AccessToken oldAccessToken,
-                    AccessToken currentAccessToken) {
-                if (currentAccessToken == null) {
-                    //User logged out
-                    Toast.makeText(MainActivity.this, "Logged out", Toast.LENGTH_SHORT).show();
-
-                    mAuth.signOut();
-                    findViewById(R.id.navigation).setVisibility(View.GONE);
-                    //stopService(new Intent(MainActivity.this, LocationService.class));
-
-                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.frame_layout, StartFragment.newInstance());
-                    transaction.commit();
-                }
-            }
-        };
-
-        startService(new Intent(getApplicationContext(), LocationService.class));
-
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         LoginManager.getInstance().logOut();
-        //stopService(new Intent(MainActivity.this, LocationService.class));
     }
 
     @Override
@@ -190,4 +224,5 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
 }

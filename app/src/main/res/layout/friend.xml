@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/indigo"
+        android:textStyle="bold"
+        android:textSize="20dp"
+        android:text="Roxana Macarie"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/blue"
+        android:layout_marginLeft="10dp"
+        android:text="Details about your friend:"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/blue"
+        android:textSize="10dp"
+        android:text="Location:"
+        android:layout_marginLeft="40dp"/>
+    <TextView
+        android:id="@+id/latitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/blue"
+        android:textSize="10dp"
+        android:layout_marginLeft="70dp"
+        android:text="Latitude: 46.70222222"/>
+
+    <TextView
+        android:id="@+id/longitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/blue"
+        android:textSize="10dp"
+        android:layout_marginLeft="70dp"
+        android:text="Longitude: 45.333333333"/>
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:textSize="10dp"
+        android:textColor="@color/blue"
+        android:text="Date: 18/04/2018 18:34:56"/>
+
+    <TextView
+        android:id="@+id/lastTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/red"
+        android:textStyle="bold|italic"
+        android:layout_marginLeft="10dp"
+        android:text="Last time online:"/>
+    <TextView
+        android:id="@+id/distance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/red"
+        android:textStyle="bold|italic"
+        android:layout_marginLeft="10dp"
+        android:text="Last position: "/>
+
+</LinearLayout>

@@ -11,11 +11,18 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.facebook.Profile;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 
 public class LocationService extends Service implements
@@ -35,6 +42,8 @@ public class LocationService extends Service implements
     public static final int LOCATION_INTERVAL = 1000;
     public static final int FASTEST_LOCATION_INTERVAL = 5000;
 
+    public String username;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mLocationClient = new GoogleApiClient.Builder(this)
@@ -49,6 +58,8 @@ public class LocationService extends Service implements
 
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationClient.connect();
+
+        username = intent.getStringExtra("username");
 
         return START_STICKY;
     }
@@ -103,11 +114,30 @@ public class LocationService extends Service implements
         intent.putExtra(EXTRA_LONGITUDE, lng);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference();
+
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        String currentDateandTime = sdf.format(Calendar.getInstance().getTime());
+        String[] date = currentDateandTime.split(" ");
+        String day = date[0];
+        String hour = date[1];
+
+
+        Log.d("BLA", username);
+        myRef.child("users").child(username).setValue(new User(username, lat, lng, day, hour));
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "Failed to connect to Google API");
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mLocationClient.disconnect();
     }
 }

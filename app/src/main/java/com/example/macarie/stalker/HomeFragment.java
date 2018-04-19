@@ -70,9 +70,6 @@ public class HomeFragment extends Fragment {
                 }, new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST)
         );
 
-        Intent intent = new Intent(v.getContext(), LocationService.class);
-        v.getContext().startService(intent);
-
         return v;
     }
 

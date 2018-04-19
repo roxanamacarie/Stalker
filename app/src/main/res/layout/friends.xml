@@ -1,18 +1,15 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.macarie.stalker.FriendsFragment">
 
-    <TextView
-        android:id="@+id/friends"
+    <ListView
+        android:id="@+id/friendsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerVertical="true"
-        android:background="@drawable/backg"
-        android:layout_centerHorizontal="true"
-        android:text="In progress"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
+        tools:listitem="@layout/friend"
+        android:transcriptMode="alwaysScroll">
+    </ListView>
 
-
-</RelativeLayout>
+</FrameLayout>
