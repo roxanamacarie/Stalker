@@ -112,6 +112,9 @@ public class MainActivity extends AppCompatActivity {
                                 selectedFragment = FriendsFragment.newInstance();
                                 break;
                             case R.id.chat:
+                               // Intent myIntent = new Intent(MainActivity.this, ChatFriendsActivity.class);
+                               // MainActivity.this.startActivity(myIntent);
+
                                 selectedFragment = ChatFragment.newInstance();
                                 break;
                         }

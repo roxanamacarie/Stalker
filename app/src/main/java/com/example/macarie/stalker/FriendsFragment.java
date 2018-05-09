@@ -143,14 +143,15 @@ public class FriendsFragment extends Fragment {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                lastTime += " minutes ago";
+                lastTime += " ago";
 
                 String distance = "Last position: ";
                 if (globalLatitude != "" && globalLongitude !="")
                     distance += getDistance(Float.valueOf(model.latitude), Float.valueOf(model.longitude), Float.valueOf(globalLatitude), Float.valueOf(globalLongitude));
                 else
                     distance += "NA";
-                distance += " meters away";
+
+                distance += " away";
                 ((TextView) v.findViewById(R.id.lastTime)).setText(lastTime);
                 ((TextView) v.findViewById(R.id.distance)).setText(distance);
             }
@@ -176,7 +177,15 @@ public class FriendsFragment extends Fragment {
         double t3 = Math.sin(a1) * Math.sin(b1);
         double tt = Math.acos(t1 + t2 + t3);
 
-        return df2.format(6366000 * tt);
+        double distance = 6366000 * tt;
+
+        if(distance < 1000) {
+            return df2.format(6366000 * tt) + " meters";
+        }
+        else {
+            return df2.format(6366000 * tt / 1000) + " km";
+        }
+
     }
     private String getTime(String day, String hour) throws ParseException {
         String date = day + " " + hour;
@@ -184,11 +193,23 @@ public class FriendsFragment extends Fragment {
         Date last = sdf.parse(date);
         String currentDateandTime = sdf.format(Calendar.getInstance().getTime());
         Date now = sdf.parse(currentDateandTime);
+        String typeDate = "";
 
         long diffInMillies = Math.abs(now.getTime() - last.getTime());
         long diff = TimeUnit.MINUTES.convert(diffInMillies, TimeUnit.MILLISECONDS);
+        typeDate = " minutes";
 
-        return Long.toString(diff);
+        if (diff > 60) {
+            diff = TimeUnit.HOURS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+            typeDate = " hours";
+        }
+
+        if (diff > 24) {
+            diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+            typeDate = " days";
+        }
+
+        return Long.toString(diff) + typeDate ;
     }
 
     public void getAppFriends(final Set<String> friends) {

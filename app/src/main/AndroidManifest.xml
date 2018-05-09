@@ -44,7 +44,10 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-
+        <activity
+            android:name="com.example.macarie.stalker.ChatFriendsActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
         <service android:name=".LocationService"/>
 
 
