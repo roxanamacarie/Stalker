@@ -202,12 +202,14 @@ public class FriendsFragment extends Fragment {
         if (diff > 60) {
             diff = TimeUnit.HOURS.convert(diffInMillies, TimeUnit.MILLISECONDS);
             typeDate = " hours";
+
+            if (diff > 24) {
+                diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                typeDate = " days";
+            }
         }
 
-        if (diff > 24) {
-            diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-            typeDate = " days";
-        }
+
 
         return Long.toString(diff) + typeDate ;
     }
